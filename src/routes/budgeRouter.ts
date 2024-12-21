@@ -1,17 +1,27 @@
 import { Router } from "express";
 import { BudgetController } from "../controllers/BudgetController";
-
+import { ExpensesController } from "../controllers/ExpenseController";
 import {
   validateBudgeExists,
-  validateBudgetInput,
   validateBudgetId,
+  validateBudgetInput,
 } from "../middleware/budget";
+import {
+  validateExpenseExists,
+  validateExpenseId,
+  validateExpenseInput,
+} from "../middleware/expense";
 import { handleInputErrors } from "../middleware/validation";
 
 const router = Router();
 
+//*  Roytes for  budgets *//
+
 router.param("budgetId", validateBudgetId);
 router.param("budgetId", validateBudgeExists);
+
+router.param("expenseId", validateExpenseId);
+router.param("expenseId", validateExpenseExists);
 
 router.get("/", BudgetController.getAll);
 
@@ -32,5 +42,25 @@ router.put(
 );
 
 router.delete("/:budgetId", BudgetController.deletetById);
+
+//*  Roytes for  expenses *//
+
+router.post(
+  "/:budgetId/expenses",
+  validateExpenseInput,
+  handleInputErrors,
+  ExpensesController.create
+);
+
+router.get("/:budgetId/expenses/:expenseId", ExpensesController.getById);
+
+router.put(
+  "/:budgetId/expenses/:expenseId",
+  validateBudgetInput,
+  handleInputErrors,
+  ExpensesController.updateById
+);
+
+router.delete("/:budgetId/expenses/:expenseId", ExpensesController.deleteById);
 
 export default router;

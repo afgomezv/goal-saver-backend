@@ -22,6 +22,12 @@ export const validateBudgetId = async (
     .withMessage("ID must be greater than zero")
     .run(req);
 
+  let errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
+
   next();
 };
 
