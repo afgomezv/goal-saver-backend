@@ -33,10 +33,42 @@ export class AuthController {
 
       res.status(200).json({
         message: "Account created successfully",
-        data: user,
+        data: {
+          name: user.name,
+          email: user.email,
+          confirmed: user.confirmed,
+        },
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  };
+
+  static confirmAccount = async (req: Request, res: Response) => {
+    const { token } = req.body;
+
+    const user = await User.findOne({
+      where: {
+        token,
+      },
+    });
+
+    if (!user) {
+      res.status(401).json({ error: "Invalid token" });
+      return;
+    }
+
+    user.confirmed = true;
+    user.token = null;
+    await user.save();
+
+    res.status(200).json({
+      message: "Account confirmation successful",
+      data: {
+        name: user.name,
+        email: user.email,
+        confirmed: user.confirmed,
+      },
+    });
   };
 }

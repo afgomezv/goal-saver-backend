@@ -15,3 +15,17 @@ export const validateUserInput = async (
 
   next();
 };
+
+export const validateTokenInput = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await body("token")
+    .notEmpty()
+    .isLength({ min: 6, max: 6 })
+    .withMessage("Token is  not valid")
+    .run(req);
+
+  next();
+};
