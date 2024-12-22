@@ -29,3 +29,17 @@ export const validateTokenInput = async (
 
   next();
 };
+
+export const validateloginInput = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await body("email").isEmail().withMessage("Email is not valid").run(req);
+  await body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .run(req);
+
+  next();
+};
