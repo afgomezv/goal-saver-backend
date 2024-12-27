@@ -2,6 +2,7 @@ import { Router } from "express";
 import { limiter } from "../config/limit";
 import { AuthController } from "../controllers/AuthControllers";
 import {
+  authenticate,
   validateForgotPassword,
   validateLoginInput,
   validateTokenInput,
@@ -55,5 +56,7 @@ router.post(
   handleInputErrors,
   AuthController.resetPasswordWithToken
 );
+
+router.get("/user", authenticate, AuthController.user);
 
 export default router;

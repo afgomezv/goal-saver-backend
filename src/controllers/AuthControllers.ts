@@ -1,10 +1,9 @@
 import type { Request, Response } from "express";
+import { AuthEmail } from "../email/AuthEmail";
 import User from "../models/User";
 import { checkPassword, hashPassword } from "../utils/auth";
-import { generateToken } from "../utils/token";
-import { AuthEmail } from "../email/AuthEmail";
-import { check } from "express-validator";
 import { generateJWT } from "../utils/jwt";
+import { generateToken } from "../utils/token";
 
 export class AuthController {
   static createAccount = async (req: Request, res: Response) => {
@@ -204,5 +203,9 @@ export class AuthController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  };
+
+  static user = async (req: Request, res: Response) => {
+    res.json(req.user);
   };
 }
