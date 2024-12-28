@@ -3,10 +3,12 @@ import { limiter } from "../config/limit";
 import { AuthController } from "../controllers/AuthControllers";
 import {
   authenticate,
+  validateCheckPassword,
   validateForgotPassword,
   validateLoginInput,
   validateTokenInput,
   validateTokenReset,
+  validateUpdatePassword,
   validateUserInput,
 } from "../middleware/auth";
 import { handleInputErrors } from "../middleware/validation";
@@ -58,5 +60,21 @@ router.post(
 );
 
 router.get("/user", authenticate, AuthController.user);
+
+router.post(
+  "/update-password",
+  authenticate,
+  validateUpdatePassword,
+  handleInputErrors,
+  AuthController.updateCurrentUserPassword
+);
+
+router.post(
+  "/check-password",
+  authenticate,
+  validateCheckPassword,
+  handleInputErrors,
+  AuthController.checkPassword
+);
 
 export default router;

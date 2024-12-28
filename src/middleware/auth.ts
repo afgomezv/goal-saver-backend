@@ -82,6 +82,36 @@ export const validateTokenReset = async (
   next();
 };
 
+export const validateUpdatePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await body("current_password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .run(req);
+  await body("password")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters")
+    .run(req);
+
+  next();
+};
+
+export const validateCheckPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .run(req);
+
+  next();
+};
+
 export const authenticate = async (
   req: Request,
   res: Response,
