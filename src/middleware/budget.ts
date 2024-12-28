@@ -72,3 +72,15 @@ export const validateBudgeExists = async (
     });
   }
 };
+
+export const hasAccess = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.budget.userId !== req.user.id) {
+    res.status(401).json({ error: "Unauthorized access" });
+    return;
+  }
+  next();
+};

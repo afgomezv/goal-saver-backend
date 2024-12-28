@@ -7,7 +7,9 @@ export class BudgetController {
     try {
       const budgets = await Budget.findAll({
         order: [["createdAt", "DESC"]],
-        // TODO: Filtrar por el usuario autenticado
+        where: {
+          userId: req.user.id,
+        },
       });
       res.json({ budgets });
     } catch (error) {
@@ -19,14 +21,14 @@ export class BudgetController {
   static create = async (req: Request, res: Response) => {
     try {
       const budget = new Budget(req.body);
+      budget.userId = req.user.id;
       await budget.save();
       res.status(201).json({
         message: "budget created successfully",
         data: budget,
       });
     } catch (error) {
-      //console.log(error);
-      res.status(500).json({ error: "budget can't create" });
+      res.status(500).json({ error: error.message });
     }
   };
 
@@ -34,7 +36,9 @@ export class BudgetController {
     const budget = await Budget.findByPk(req.budget.id, {
       include: [Expense],
     });
+
     res.status(200).json(budget);
+    return;
   };
 
   static updatetById = async (req: Request, res: Response) => {

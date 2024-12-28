@@ -1,12 +1,12 @@
 import {
-  AllowNull,
-  Column,
-  DataType,
-  Default,
-  HasMany,
-  Model,
   Table,
+  Column,
+  Model,
+  DataType,
+  HasMany,
+  Default,
   Unique,
+  AllowNull,
 } from "sequelize-typescript";
 import Budget from "./Budget";
 
@@ -48,7 +48,7 @@ class User extends Model {
     onUpdate: "CASCADE",
     onDelete: "CASCADE",
   })
-  declare budget: Budget[];
+  declare budgets: Budget[];
 }
 
 export default User;

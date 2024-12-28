@@ -2,6 +2,7 @@ import { Router } from "express";
 import { BudgetController } from "../controllers/BudgetController";
 import { ExpensesController } from "../controllers/ExpenseController";
 import {
+  hasAccess,
   validateBudgeExists,
   validateBudgetId,
   validateBudgetInput,
@@ -12,13 +13,17 @@ import {
   validateExpenseInput,
 } from "../middleware/expense";
 import { handleInputErrors } from "../middleware/validation";
+import { authenticate } from "../middleware/auth";
 
 const router = Router();
+
+router.use(authenticate);
 
 //*  Roytes for  budgets *//
 
 router.param("budgetId", validateBudgetId);
 router.param("budgetId", validateBudgeExists);
+router.param("budgetId", hasAccess);
 
 router.param("expenseId", validateExpenseId);
 router.param("expenseId", validateExpenseExists);
