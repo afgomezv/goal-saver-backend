@@ -41,7 +41,7 @@ export class BudgetController {
     return;
   };
 
-  static updatetById = async (req: Request, res: Response) => {
+  static updateById = async (req: Request, res: Response) => {
     await req.budget.update(req.body);
     res.status(200).json({
       message: "budget updated successfully",
@@ -49,7 +49,7 @@ export class BudgetController {
     });
   };
 
-  static deletetById = async (req: Request, res: Response) => {
+  static deleteById = async (req: Request, res: Response) => {
     await req.budget.destroy();
     res.status(200).json({
       message: "budget deleted successfully",

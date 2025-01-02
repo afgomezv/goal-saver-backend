@@ -2,10 +2,12 @@ import { createRequest, createResponse } from "node-mocks-http";
 import { budgets } from "../mocks/Budgets";
 import { BudgetController } from "../../controllers/BudgetController";
 import Budget from "../../models/Budget";
+import Expense from "../../models/Expense";
 
 jest.mock("../../models/Budget", () => ({
   findAll: jest.fn(),
   create: jest.fn(),
+  findByPk: jest.fn(),
 }));
 
 describe("BudgeController.getAll", () => {
@@ -148,5 +150,122 @@ describe("BudgetController.create", () => {
 
     expect(mockBudget.save).not.toHaveBeenCalled();
     expect(Budget.create).toHaveBeenCalledWith(req.body);
+  });
+});
+
+describe("BudgetController.getById", () => {
+  beforeEach(() => {
+    (Budget.findByPk as jest.Mock).mockImplementation((id) => {
+      const budget = budgets.filter((budget) => budget.id === id)[0];
+      return Promise.resolve(budget);
+    });
+  });
+
+  it("Should return a budget with ID 1 and 3 expenses", async () => {
+    const req = createRequest({
+      method: "GET",
+      url: "/api/budgets/:id",
+      budget: { id: 1 },
+    });
+
+    const res = createResponse();
+
+    await BudgetController.getById(req, res);
+
+    const data = res._getJSONData();
+    expect(res.statusCode).toBe(200);
+    expect(data.expenses).toHaveLength(3);
+    expect(Budget.findByPk).toHaveBeenCalled();
+    expect(Budget.findByPk).toHaveBeenCalledTimes(1);
+    expect(Budget.findByPk).toHaveBeenCalledWith(req.budget.id, {
+      include: [Expense],
+    });
+  });
+
+  it("Should return a budget with ID 2 and 2 expenses", async () => {
+    const req = createRequest({
+      method: "GET",
+      url: "/api/budgets/:id",
+      budget: { id: 2 },
+    });
+
+    const res = createResponse();
+
+    await BudgetController.getById(req, res);
+
+    const data = res._getJSONData();
+    expect(res.statusCode).toBe(200);
+    expect(data.expenses).toHaveLength(2);
+  });
+
+  it("Should return a budget with ID 3 and 0 expenses", async () => {
+    const req = createRequest({
+      method: "GET",
+      url: "/api/budgets/:budgetId",
+      budget: { id: 3 },
+    });
+
+    const res = createResponse();
+
+    await BudgetController.getById(req, res);
+
+    const data = res._getJSONData();
+    expect(res.statusCode).toBe(200);
+    expect(data.expenses).toHaveLength(0);
+  });
+});
+
+describe("BudgetController.updateById", () => {
+  it("Should update the budget and return success message", async () => {
+    const budgetMock = {
+      update: jest.fn().mockResolvedValue(true),
+    };
+
+    const req = createRequest({
+      method: "PUT",
+      url: "/api/budgets/:budgetId",
+      budget: budgetMock,
+      body: {
+        name: "Updated Budget",
+        amount: 5000,
+      },
+    });
+
+    const res = createResponse();
+
+    await BudgetController.updateById(req, res);
+
+    const data = res._getJSONData();
+
+    expect(res.statusCode).toBe(200);
+    expect(data.message).toBe("budget updated successfully");
+    expect(budgetMock.update).toHaveBeenCalled();
+    expect(budgetMock.update).toHaveBeenCalledTimes(1);
+    expect(budgetMock.update).toHaveBeenCalledWith(req.body);
+  });
+});
+
+describe("BudgetController.deleteById", () => {
+  it("Should delete the budget and return success message", async () => {
+    const budgetMock = {
+      destroy: jest.fn().mockResolvedValue(true),
+    };
+
+    const req = createRequest({
+      method: "DELETE",
+      url: "/api/budgets/:budgetId",
+      budget: budgetMock,
+    });
+
+    const res = createResponse();
+
+    await BudgetController.deleteById(req, res);
+
+    const data = res._getJSONData();
+
+    expect(res.statusCode).toBe(200);
+    expect(data.message).toBe("budget deleted successfully");
+    expect(budgetMock.destroy).toHaveBeenCalled();
+    expect(budgetMock.destroy).toHaveBeenCalledTimes(1);
   });
 });

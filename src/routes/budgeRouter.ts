@@ -43,10 +43,10 @@ router.put(
   "/:budgetId",
   validateBudgetInput,
   handleInputErrors,
-  BudgetController.updatetById
+  BudgetController.updateById
 );
 
-router.delete("/:budgetId", BudgetController.deletetById);
+router.delete("/:budgetId", BudgetController.deleteById);
 
 //*  Roytes for  expenses *//
 
