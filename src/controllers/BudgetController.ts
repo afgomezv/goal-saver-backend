@@ -20,7 +20,7 @@ export class BudgetController {
 
   static create = async (req: Request, res: Response) => {
     try {
-      const budget = new Budget(req.body);
+      const budget = await Budget.create(req.body);
       budget.userId = req.user.id;
       await budget.save();
       res.status(201).json({
@@ -28,7 +28,7 @@ export class BudgetController {
         data: budget,
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: "budget can't be created" });
     }
   };
 
