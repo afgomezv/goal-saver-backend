@@ -12,7 +12,6 @@ export class ExpensesController {
         expense,
       });
     } catch (error) {
-      console.log(error);
       res.status(500).json({ error: "expense can't create" });
     }
   };
