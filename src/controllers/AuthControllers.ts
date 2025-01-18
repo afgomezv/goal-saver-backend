@@ -21,7 +21,7 @@ export class AuthController {
     }
 
     try {
-      const user = new User(req.body);
+      const user = await User.create(req.body);
       user.password = await hashPassword(password);
       user.token = generateToken();
       await user.save();
@@ -32,7 +32,7 @@ export class AuthController {
         token: user.token,
       });
 
-      res.status(200).json({
+      res.status(201).json({
         message: "Account created successfully",
         data: {
           name: user.name,
