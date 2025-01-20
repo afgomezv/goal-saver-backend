@@ -23,7 +23,13 @@ export class AuthController {
     try {
       const user = await User.create(req.body);
       user.password = await hashPassword(password);
-      user.token = generateToken();
+      const token = generateToken();
+
+      if (process.env.NODE_ENV !== "production") {
+        globalThis.goalSaverConfirmationToken = token;
+      }
+
+      user.token = token;
       await user.save();
 
       await AuthEmail.sendConfirmationEmail({
@@ -65,7 +71,7 @@ export class AuthController {
       await user.save();
 
       res.status(200).json({
-        message: "Account confirmation successful",
+        message: "Account confirmation successfully",
         data: {
           name: user.name,
           email: user.email,

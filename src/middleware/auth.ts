@@ -32,7 +32,6 @@ export const validateTokenInput = async (
   next: NextFunction
 ) => {
   await body("token")
-    .notEmpty()
     .isLength({ min: 6, max: 6 })
     .withMessage("Token is  not valid")
     .run(req);

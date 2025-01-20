@@ -1,7 +1,6 @@
 import request from "supertest";
 import server, { connectDB } from "../../server";
 import { AuthController } from "../../controllers/AuthControllers";
-import { log } from "node:console";
 
 describe("Aunthentication - Create Account", () => {
   it("should display validation errors when form is empty", async () => {
@@ -92,5 +91,41 @@ describe("Aunthentication - Create Account", () => {
     expect(response.status).not.toBe(400);
     expect(response.status).not.toBe(201);
     expect(response.body).not.toHaveProperty("errors");
+  });
+});
+
+describe("Authentication - Account Confirmation with Token", () => {
+  it("should return 400 status code when the token is empty or token is not valid", async () => {
+    const response = await request(server)
+      .post("/api/auth/confirm-account")
+      .send({ token: "not_valid" });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("errors");
+    expect(response.body.errors).toHaveLength(1);
+    expect(response.body.errors[0].msg).toBe("Token is  not valid");
+  });
+
+  it("should return 401 status code when invalid Token", async () => {
+    const response = await request(server)
+      .post("/api/auth/confirm-account")
+      .send({ token: "123456" });
+
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toBe("Invalid token");
+    expect(response.status).not.toBe(200);
+  });
+
+  it("should confirm account with a valid Token", async () => {
+    const token = globalThis.goalSaverConfirmationToken;
+
+    const response = await request(server)
+      .post("/api/auth/confirm-account")
+      .send({ token });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe("Account confirmation successfully");
+    expect(response.status).not.toBe(401);
   });
 });
