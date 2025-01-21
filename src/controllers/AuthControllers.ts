@@ -114,7 +114,7 @@ export class AuthController {
 
       res.status(200).json({
         ok: ispasswordCorrect,
-        message: "Login successful",
+        message: "Login successfully",
         data: {
           name: user.name,
           email: user.email,
