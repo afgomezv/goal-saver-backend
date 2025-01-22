@@ -307,7 +307,7 @@ async function authenticateUser() {
   expect(response.status).toBe(200);
 }
 
-describe("GET /API/budgets", () => {
+describe("GET /api/budgets", () => {
   beforeAll(() => {
     jest.restoreAllMocks(); // Restaura las funciones de lsos jest.spy a su implementacion original
   });
@@ -346,7 +346,7 @@ describe("GET /API/budgets", () => {
   });
 });
 
-describe("POST /API/budgets", () => {
+describe("POST /api/budgets", () => {
   beforeAll(async () => {
     await authenticateUser();
   });
@@ -380,5 +380,180 @@ describe("POST /API/budgets", () => {
 
     expect(response.status).toBe(201);
     expect(response.body.message).toBe("budget created successfully");
+  });
+});
+
+describe("GET /api/budgets/:id", () => {
+  beforeAll(async () => {
+    await authenticateUser();
+  });
+
+  it("should reject unauthenticated get request to budget id without a jwt", async () => {
+    const response = await request(server).get("/api/budgets/1");
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe("Not authenticated");
+  });
+
+  it("should return 400 bad request when id is not valid", async () => {
+    const response = await request(server)
+      .get("/api/budgets/not_valid")
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toBeDefined();
+    expect(response.body.errors).toBeTruthy();
+    expect(response.body.errors).toHaveLength(1);
+    expect(response.body.errors[0].msg).toBe("ID must be a number");
+    expect(response.status).not.toBe(401);
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+
+  it("should return 401 not found when a budget doesnt exists", async () => {
+    let id = 1000;
+    const response = await request(server)
+      .get(`/api/budgets/${id}`)
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(404);
+    expect(response.status).not.toBe(400);
+    expect(response.status).not.toBe(401);
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toBe(`Budget not found with ID: ${id}`);
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+
+  it("should return a single budget by id", async () => {
+    const response = await request(server)
+      .get(`/api/budgets/1`)
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(200);
+    expect(response.status).not.toBe(400);
+    expect(response.status).not.toBe(401);
+    expect(response.status).not.toBe(401);
+    expect(response.body).not.toHaveProperty("error");
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+});
+
+describe("PUT /api/budgets/:id", () => {
+  beforeAll(async () => {
+    await authenticateUser();
+  });
+
+  it("should reject unauthenticated get request to budget id without a jwt", async () => {
+    const response = await request(server).put("/api/budgets/1");
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe("Not authenticated");
+  });
+
+  it("should return 400 bad request when id is not valid", async () => {
+    const response = await request(server)
+      .put("/api/budgets/not_valid")
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toBeDefined();
+    expect(response.body.errors).toBeTruthy();
+    expect(response.body.errors).toHaveLength(1);
+    expect(response.body.errors[0].msg).toBe("ID must be a number");
+    expect(response.status).not.toBe(401);
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+
+  it("should return 401 not found when a budget doesnt exists", async () => {
+    let id = 1000;
+    const response = await request(server)
+      .put(`/api/budgets/${id}`)
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(404);
+    expect(response.status).not.toBe(400);
+    expect(response.status).not.toBe(401);
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toBe(`Budget not found with ID: ${id}`);
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+
+  it("should return 400 when has validation erros if the form is empty", async () => {
+    const response = await request(server)
+      .put(`/api/budgets/1`)
+      .auth(jwt, { type: "bearer" })
+      .send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toBeDefined();
+    expect(response.body.errors).toBeTruthy();
+    expect(response.body.errors).toHaveLength(4);
+  });
+
+  it("should return 200 when udpate budget", async () => {
+    const response = await request(server)
+      .put("/api/budgets/1")
+      .auth(jwt, { type: "bearer" })
+      .send({
+        name: "Updated Budget",
+        amount: 1500,
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.status).not.toBe(400);
+    expect(response.status).not.toBe(401);
+    expect(response.status).not.toBe(401);
+    expect(response.body.message).toBe("budget updated successfully");
+    expect(response.body).not.toHaveProperty("error");
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+});
+
+describe("DELETE /api/budgets/:id", () => {
+  beforeAll(async () => {
+    await authenticateUser();
+  });
+
+  it("should reject unauthenticated get request to budget id without a jwt", async () => {
+    const response = await request(server).delete("/api/budgets/1");
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe("Not authenticated");
+  });
+
+  it("should return 400 bad request when id is not valid", async () => {
+    const response = await request(server)
+      .delete("/api/budgets/not_valid")
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toBeDefined();
+    expect(response.body.errors).toBeTruthy();
+    expect(response.body.errors).toHaveLength(1);
+    expect(response.body.errors[0].msg).toBe("ID must be a number");
+    expect(response.status).not.toBe(401);
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+
+  it("should return 401 not found when a budget doesnt exists", async () => {
+    let id = 1000;
+    const response = await request(server)
+      .delete(`/api/budgets/${id}`)
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(404);
+    expect(response.status).not.toBe(400);
+    expect(response.status).not.toBe(401);
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toBe(`Budget not found with ID: ${id}`);
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+
+  it("should delete a budget and return a success message", async () => {
+    const response = await request(server)
+      .delete("/api/budgets/1")
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.message).toBe("budget deleted successfully");
   });
 });
