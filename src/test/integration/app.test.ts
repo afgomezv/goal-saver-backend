@@ -255,7 +255,7 @@ describe("Authentication - Login", () => {
     expect(checkPassword).toHaveBeenCalledTimes(1);
   });
 
-  it("should return 401 status code when if the password is incorrect", async () => {
+  it("should return a jwt", async () => {
     const findOne = (
       jest.spyOn(User, "findOne") as jest.Mock
     ).mockResolvedValue({
@@ -277,8 +277,6 @@ describe("Authentication - Login", () => {
       password: "correctpassword",
     });
 
-    console.log(response.body);
-
     expect(response.status).toBe(200);
     expect(response.body.data.token).toEqual("jwt_token");
     expect(response.body.message).toEqual("Login successfully");
@@ -296,5 +294,64 @@ describe("Authentication - Login", () => {
     expect(generateJWT).toHaveBeenCalled();
     expect(generateJWT).toHaveBeenCalledTimes(1);
     expect(generateJWT).toHaveBeenCalledWith(50);
+  });
+});
+
+describe("GET /API/budgets", () => {
+  let jwt: string;
+
+  beforeAll(() => {
+    jest.restoreAllMocks(); // Restaura las funciones de lsos jest.spy a su implementacion original
+  });
+
+  beforeAll(async () => {
+    const response = await request(server).post("/api/auth/login").send({
+      email: "test@email.com",
+      password: "12345678",
+    });
+    jwt = response.body.data.token;
+    expect(response.status).toBe(200);
+  });
+
+  it("should reject unauthenticated access to budgets without a jwt", async () => {
+    const response = await request(server).get("/api/budgets");
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe("Not authenticated");
+  });
+
+  it("should allow authenticated access to budgets with a valid jwt", async () => {
+    const response = await request(server)
+      .get("/api/budgets")
+      .auth(jwt, { type: "bearer" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.budgets).toHaveLength(0);
+
+    expect(response.status).not.toBe(401);
+    expect(response.body.error).not.toBe("Not authenticated");
+  });
+
+  it("should allow authenticated access to budgets without a valid jwt", async () => {
+    const response = await request(server)
+      .get("/api/budgets")
+      .auth("not_valid", { type: "bearer" });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty("error");
+    expect(response.body.error).toBe("Token invalid");
+  });
+});
+
+describe("POST /API/budgets", () => {
+  let jwt: string;
+
+  beforeAll(async () => {
+    const response = await request(server).post("/api/auth/login").send({
+      email: "test@email.com",
+      password: "12345678",
+    });
+    jwt = response.body.data.token;
+    expect(response.status).toBe(200);
   });
 });
