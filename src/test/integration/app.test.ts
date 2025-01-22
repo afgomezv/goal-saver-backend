@@ -297,20 +297,23 @@ describe("Authentication - Login", () => {
   });
 });
 
-describe("GET /API/budgets", () => {
-  let jwt: string;
+let jwt: string;
+async function authenticateUser() {
+  const response = await request(server).post("/api/auth/login").send({
+    email: "test@email.com",
+    password: "12345678",
+  });
+  jwt = response.body.data.token;
+  expect(response.status).toBe(200);
+}
 
+describe("GET /API/budgets", () => {
   beforeAll(() => {
     jest.restoreAllMocks(); // Restaura las funciones de lsos jest.spy a su implementacion original
   });
 
   beforeAll(async () => {
-    const response = await request(server).post("/api/auth/login").send({
-      email: "test@email.com",
-      password: "12345678",
-    });
-    jwt = response.body.data.token;
-    expect(response.status).toBe(200);
+    await authenticateUser();
   });
 
   it("should reject unauthenticated access to budgets without a jwt", async () => {
@@ -344,14 +347,38 @@ describe("GET /API/budgets", () => {
 });
 
 describe("POST /API/budgets", () => {
-  let jwt: string;
-
   beforeAll(async () => {
-    const response = await request(server).post("/api/auth/login").send({
-      email: "test@email.com",
-      password: "12345678",
-    });
-    jwt = response.body.data.token;
-    expect(response.status).toBe(200);
+    await authenticateUser();
+  });
+
+  it("should reject unauthenticated post request to budgets without a jwt", async () => {
+    const response = await request(server).post("/api/budgets");
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe("Not authenticated");
+  });
+
+  it("should return error validation when the is submitted with invalid data", async () => {
+    const response = await request(server)
+      .post("/api/budgets")
+      .auth(jwt, { type: "bearer" })
+      .send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("errors");
+    expect(response.body.errors).toHaveLength(4);
+  });
+
+  it("should return 201 when create budget successfully", async () => {
+    const response = await request(server)
+      .post("/api/budgets")
+      .auth(jwt, { type: "bearer" })
+      .send({
+        name: "Test Budget",
+        amount: 1000,
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.message).toBe("budget created successfully");
   });
 });
