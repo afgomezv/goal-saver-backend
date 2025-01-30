@@ -15,12 +15,10 @@ export class AuthEmail {
       html: `
        <p>Hola ${user.name} has creado tu cuenta en LoadSaver, ya esta casi lista</p>
        <p>Para confirmar tu cuenta, haz click en el siguiente enlace:</p>
-       <a href="#">Confirmar cuenta</a>
+       <a href="${process.env.FRONTEND_URL}/auth/confirm-account">Confirmar cuenta</a>
        <p>Ingresa el codigo: <b>${user.token}</b></p>
       `,
     });
-
-    //console.log("Mensaje Enviado", email.messageId);
   };
 
   static sendPasswordResetToken = async (user: EmailType) => {
@@ -31,7 +29,7 @@ export class AuthEmail {
       html: `
        <p>Hola ${user.name} has creado solicitado reestablecer tu contraseña </p>
        <p>Para reestablecer tu contraseña, haz click en el siguiente enlace:</p>
-       <a href="#">Reestablecer Password</a>
+       <a href="${process.env.FRONTEND_URL}/auth/a">Reestablecer Password</a>
        <p>Ingresa el codigo: <b>${user.token}</b></p>
       `,
     });
