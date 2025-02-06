@@ -74,3 +74,16 @@ export const validateExpenseExists = async (
     });
   }
 };
+
+export const belongsToBudget = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.budget.id !== req.expense.budgetId) {
+    const error = new Error("Action not valid");
+    return res.status(403).json({ error: error.message });
+  }
+
+  next();
+};
