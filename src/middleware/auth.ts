@@ -111,6 +111,17 @@ export const validateCheckPassword = async (
   next();
 };
 
+export const validateUpdateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await body("name").notEmpty().withMessage("Name is required").run(req);
+  await body("email").isEmail().withMessage("Email is not valid").run(req);
+
+  next();
+};
+
 export const authenticate = async (
   req: Request,
   res: Response,

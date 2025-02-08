@@ -9,6 +9,7 @@ import {
   validateTokenInput,
   validateTokenReset,
   validateUpdatePassword,
+  validateUpdateUser,
   validateUserInput,
 } from "../middleware/auth";
 import { handleInputErrors } from "../middleware/validation";
@@ -75,6 +76,14 @@ router.post(
   validateCheckPassword,
   handleInputErrors,
   AuthController.checkPassword
+);
+
+router.put(
+  "/user",
+  authenticate,
+  validateUpdateUser,
+  handleInputErrors,
+  AuthController.updateUser
 );
 
 export default router;
